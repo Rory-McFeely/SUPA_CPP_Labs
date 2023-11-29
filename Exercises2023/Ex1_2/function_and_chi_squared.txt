@@ -1,0 +1,3 @@
+Results of fit
+Function: y = 0.873629x + 2.026278
+Chi squared = 3789583.582992
