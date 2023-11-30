@@ -162,6 +162,9 @@ std::vector< std::pair<double,double> > FiniteFunction::makeHist(std::vector<dou
   for (double point : points){
     //Get bin index (starting from 0) the point falls into using point value, range, and Nbins
     int bindex = static_cast<int>(floor((point-m_RMin)/((m_RMax-m_RMin)/(double)Nbins)));
+    if (bindex<0 || bindex>Nbins){
+      continue;
+    }
     bins[bindex]++; //weight of 1 for each data point
     norm++; //Total number of data points
   }
