@@ -10,6 +10,7 @@ using std::filesystem::path;
 
 //Empty constructor
 FiniteFunction::FiniteFunction(){
+  //I'm guessing here RMin and RMax are being set to +/- 5.0 as default values?
   m_RMin = -5.0;
   m_RMax = 5.0;
   this->checkPath("DefaultFunction");
