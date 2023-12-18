@@ -3,6 +3,7 @@
 #include <vector>
 #include "FiniteFunctions.h"
 #include <filesystem> //To check extensions in a nice way
+#include <math.h>
 
 #include "gnuplot-iostream.h" //Needed to produce plots (not part of the course) 
 
@@ -64,7 +65,40 @@ Integration by hand (output needed to normalise function when plotting)
 */ 
 double FiniteFunction::integrate(int Ndiv){ //private
   //ToDo write an integrator
-  return -99;  
+  //Gotta get funcky wid it: Trapezoidal integration
+  std::cout << "Rmin = " << m_RMin << " , Rmax = " << m_RMax << std::endl;
+
+  double width = (m_RMax - m_RMin)/Ndiv;
+  double integral = 0;
+  double x0 = m_RMin;
+  double area;
+
+  for(int i=0; i<Ndiv; i++){
+    double y_0 = callFunction(x0);
+    double y_1 = callFunction(x0 + width);
+
+    //Positive slope case
+    if(y_0 < y_1){
+      area = y_0*width + ((y_1-y_0)*width)/2;
+    }
+    //Negtive slope case
+    else if(y_0 > y_1){
+      area = y_1*width + ((y_0-y_1)*width)/2;
+    }
+    //Slope = 0 (edge case)
+    else{
+      area  = y_0*width;
+    }
+    //std::cout << area << std::endl;
+
+    integral += area;
+    x0 = x0 + width;
+  }
+
+  //std::cout << "The computationally determine integral = " << integral << std::endl;
+
+  //integral = 7;
+  return integral;  
 }
 double FiniteFunction::integral(int Ndiv) { //public
   if (Ndiv <= 0){
@@ -236,3 +270,195 @@ void FiniteFunction::generatePlot(Gnuplot &gp){
     gp.send1d(m_samples);
   }
 }
+
+
+
+
+
+/* #### Gaussian Distribution #### */
+
+//Empty constructor
+NormalDistribution::NormalDistribution(){
+  m_RMin = -5.0;
+  m_RMax = 5.0;
+  this->checkPath("DefaultFunction");
+  m_Integral = NULL;
+}
+
+//initialised constructor
+NormalDistribution::NormalDistribution(std::vector<double> data, double range_min, double range_max, std::string outfile){
+  m_RMin = range_min;
+  m_RMax = range_max;
+  m_Integral = NULL;
+  m_variance = NULL;
+  m_mean = NULL;
+  m_data = data;
+  this->checkPath(outfile); //Use provided string to name output files
+}
+
+
+/*
+###################
+//Function eval
+###################
+*/ 
+
+//Calculate mean and variance
+double NormalDistribution::mean(std::vector<double> data){
+  double sum = 0;
+  for(int i=0; i<data.size(); i++){
+    sum += data[i];
+  }
+  double mean = sum/data.size();
+  std::cout << "Gauss mean = " << mean << std::endl;  //Print line for debugging
+  m_mean = mean;
+  return mean;
+};
+
+double NormalDistribution::variance(std::vector<double> data){
+  double sum = 0;
+  for(int i=0; i<data.size(); i++){
+    sum += pow((data[i]-m_mean), 2);
+  }
+  double variance = sqrt(sum/data.size());
+  std::cout << "Gauss variance = " << variance << std::endl;  //Print line for debugging
+  m_variance = variance;
+  return variance;
+};
+
+double NormalDistribution::standard_distribution(double x) {
+  //Doing checks to determine if variance and mean have been calculated:
+  if(m_variance == NULL){
+    std::cout << "Variance not determined, calculating now" << std::endl;
+    variance(m_data);
+  }
+  if(m_mean == NULL){
+    std::cout << "Mean not detemined, calculating now" << std::endl;
+    mean(m_data);
+  }
+  m_variance = 3.0;
+  double f_x = (1/(sqrt(m_variance)*sqrt(2*3.14)))*exp(-0.5*pow(((x - m_mean)/m_variance), 2));
+  return f_x;
+};
+double NormalDistribution::callFunction(double x) {return this->standard_distribution(x);}; //(overridable)
+
+
+
+
+
+
+
+
+/* #### Cauchy-Lorentz Distribution #### */
+
+//Empty constructor
+CauchyLorentz::CauchyLorentz(){
+  //Setting default values
+  m_RMin = -5.0;
+  m_RMax = 5.0;
+  m_gamma = 1.0;
+  this->checkPath("DefaultFunction");
+  m_Integral = NULL;
+}
+
+//initialised constructor
+CauchyLorentz::CauchyLorentz(std::vector<double> data, double range_min, double range_max, double gamma, std::string outfile){
+  m_RMin = range_min;
+  m_RMax = range_max;
+  m_Integral = NULL;
+  m_data = data;
+  m_gamma = gamma;
+  //m_x0 = data[0];
+  m_x0 = -1;  //This seems to be a good fit value, but isn't actually using x0 as described in the distribution equation
+  this->checkPath(outfile); //Use provided string to name output files
+}
+
+
+/*
+###################
+//Function eval
+###################
+*/ 
+
+double CauchyLorentz::cauchy_lorentz_distribution(double x){
+  //Initialising pi:
+  double pi = 2*acos(0.0); //Apparently this is a good way to do it in C++ ?? Idk I just googled it
+  double f_x = 1/(pi*m_gamma*((1+pow((x-m_x0)/m_gamma,2))));
+  return f_x;
+}
+
+//Overriding call function:
+double CauchyLorentz::callFunction(double x) {return this->cauchy_lorentz_distribution(x);};
+
+
+
+
+
+
+/* #### Negative Crystal Ball Distribution #### */
+
+//Default constructor:
+CrystalBall::CrystalBall(){
+  //Setting default values:
+  m_RMin = -5.0;
+  m_RMax = 5.0;
+  m_mean = -1.0;
+  m_variance = 3.0;
+  m_n = 5.0;
+  m_alpha = 0.5;
+  this -> checkPath("DefaultFunction");
+  m_Integral = NULL;
+}
+
+//Initialised constructor:
+CrystalBall::CrystalBall(std::vector<double> data, double range_min, double range_max, double mean, double variance, double n, double alpha, std::string outfile){
+  m_RMin = range_min;
+  m_RMax = range_max;
+  m_data = data;
+  m_mean = mean;
+  m_variance = variance;
+  m_n = n;
+  m_alpha = alpha;
+  m_Integral = NULL;
+  this->checkPath(outfile);
+}
+
+
+
+
+/*
+###################
+//Function eval
+###################
+*/ 
+
+
+double CrystalBall::CrystalBallDistribution(double x){
+  //Initialising pi:
+  double pi = 2*acos(0.0);
+
+  //Intiialising return value:
+  double f_x;
+
+  //Iniialising contsants A,B,C,D,N:
+  double A = (pow((m_n/abs(m_alpha)),m_n))*(exp(-(pow(abs(m_alpha),2)/2)));
+  double B = (m_n/abs(m_alpha)) - abs(m_alpha);
+  double C = (m_n/abs(m_alpha))*(1/(m_n-1))*(exp(-(pow(abs(m_alpha),2)/2)));
+  double D = (sqrt(pi/2))*(1+erf(abs(m_alpha)/sqrt(2)));
+  double N = 1/(m_variance*(C+D));
+
+  //Using conditionals to evaluate the function based on alpha:
+  double condition  = (x-m_mean)/m_variance;
+  if(condition > -1*m_alpha){
+    f_x = exp(-((pow((x-m_mean),2)) / (2*pow(m_variance,2))));
+  }
+  else{
+    f_x = A*(pow((B - (x-m_mean)/m_variance), -1*m_n));
+  }
+
+  return f_x;
+}
+
+
+//Overriding call function::
+double CrystalBall::callFunction(double x) {return this->CrystalBallDistribution(x);};

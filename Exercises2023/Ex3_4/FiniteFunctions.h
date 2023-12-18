@@ -4,6 +4,8 @@
 
 #pragma once //Replacement for IFNDEF
 
+
+//1/(1+x**2) Class:
 class FiniteFunction{
 
 public:
@@ -46,4 +48,71 @@ protected:
   
 private:
   double invxsquared(double x); //The default functional form
+};
+
+
+
+
+//Normal distribution class:
+class NormalDistribution : public FiniteFunction{
+
+  public:
+    NormalDistribution();
+    NormalDistribution(std::vector<double> data, double range_min, double range_max, std::string outfile);
+    virtual double callFunction(double x); //Call the function with value x (Overridable)
+    double variance(std::vector<double> data);
+    double mean(std::vector<double> data);
+  
+  protected:
+    double m_mean;
+    double m_variance;
+    std::vector<double> m_data;
+
+  private:
+    double standard_distribution(double x);
+
+};
+
+
+
+
+
+//Cauchy-Lorentz distribution class:
+class CauchyLorentz : public FiniteFunction{
+
+  public:
+    CauchyLorentz();
+    CauchyLorentz(std::vector<double> data, double range_min, double range_max, double gamma, std::string outfile);
+    virtual double callFunction(double x); //Call the function with value x (Overridable)
+  
+  protected:
+    double m_gamma;
+    double m_x0;
+    std::vector<double> m_data;
+
+  private:
+    double cauchy_lorentz_distribution(double x);
+
+};
+
+
+
+
+//Negative Crystal Ball distribution class:
+class CrystalBall : public FiniteFunction{
+
+  public:
+    CrystalBall(); //Default constructor
+    CrystalBall(std::vector<double> data, double range_min, double range_max, double mean, double variance, double n, double alpha, std::string outfile); //Custom constructor
+    virtual double callFunction (double x);
+
+  protected:
+    double m_mean;
+    double m_variance;
+    double m_n;
+    double m_alpha;
+    std::vector<double> m_data;  //I should have just implemented this into FiniteFunction class and then i wouldn't have to redeclare it in each child class :(
+
+  private:
+    double CrystalBallDistribution(double x);  //Actual crystal ball distribution function
 };
