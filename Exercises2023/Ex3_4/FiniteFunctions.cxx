@@ -4,6 +4,7 @@
 #include "FiniteFunctions.h"
 #include <filesystem> //To check extensions in a nice way
 #include <math.h>
+#include <random>
 
 #include "gnuplot-iostream.h" //Needed to produce plots (not part of the course) 
 
@@ -24,6 +25,7 @@ FiniteFunction::FiniteFunction(double range_min, double range_max, std::string o
   m_RMax = range_max;
   m_Integral = NULL;
   this->checkPath(outfile); //Use provided string to name output files
+  std::cout << "FiniteFunction constructor called..." << std::endl;
 }
 
 //Plots are called in the destructor
@@ -112,6 +114,27 @@ double FiniteFunction::integral(int Ndiv) { //public
   }
   else return m_Integral; //Don't bother re-calculating integral if Ndiv is the same as the last call
 }
+
+
+/*
+###################
+//Metropolis algorithm
+###################
+*/
+
+double FiniteFunction::sampleFunction(double x){
+  //Setting up the various parameters needed for random number generation:
+  unsigned int seed = 100; //Setting seed
+  std::mt19937 mtEngine{seed};
+  std::uniform_real_distribution<double> uniformPDF{m_RMin, m_RMax};
+
+  //First need to generate a random x point within the set range:
+  double rand_x = uniformPDF(mtEngine);
+  double variance = 1.0;  //Setting an arbitrary sigma
+  //Then generate a y value using a standard distribution centred on rand_x:
+  double rand_y = (1/(sqrt(variance)*sqrt(2*3.14)))*exp(-0.5*pow(((uniformPDF(mtEngine) - rand_x)/variance), 2));
+}
+
 
 /*
 ###################
@@ -294,6 +317,7 @@ NormalDistribution::NormalDistribution(std::vector<double> data, double range_mi
   m_mean = NULL;
   m_data = data;
   this->checkPath(outfile); //Use provided string to name output files
+  std::cout << "Normal Distribution constructor called..." << std::endl;
 }
 
 
@@ -357,20 +381,21 @@ CauchyLorentz::CauchyLorentz(){
   m_RMin = -5.0;
   m_RMax = 5.0;
   m_gamma = 1.0;
+  m_x0 = -1.0;
   this->checkPath("DefaultFunction");
   m_Integral = NULL;
 }
 
 //initialised constructor
-CauchyLorentz::CauchyLorentz(std::vector<double> data, double range_min, double range_max, double gamma, std::string outfile){
+CauchyLorentz::CauchyLorentz(std::vector<double> data, double range_min, double range_max, double mean, double gamma, std::string outfile){
   m_RMin = range_min;
   m_RMax = range_max;
   m_Integral = NULL;
   m_data = data;
   m_gamma = gamma;
-  //m_x0 = data[0];
-  m_x0 = -1;  //This seems to be a good fit value, but isn't actually using x0 as described in the distribution equation
+  m_x0 = mean;
   this->checkPath(outfile); //Use provided string to name output files
+  std::cout << "Cauchy-Lorentz distribution constructor called..." << std::endl;
 }
 
 
@@ -421,6 +446,7 @@ CrystalBall::CrystalBall(std::vector<double> data, double range_min, double rang
   m_alpha = alpha;
   m_Integral = NULL;
   this->checkPath(outfile);
+  std::cout << "Negative crystal ball constructor called..." << std::endl;
 }
 
 

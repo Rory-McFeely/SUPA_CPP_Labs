@@ -22,10 +22,11 @@ int main(){
 
     //Declaring variables
     double range_min = -10.0;
-    double range_max = 10.0;
-    double gamma = 2.6;  //For Cauchy-Lorentz distribution  {2.6 seems to be good value}
+    double range_max = 10.0;    
     int nBins = 49;
-    std::string output_file = "testOutput";
+
+    //For Cauchy-Lorentz distribution  {2.6 seems to be good value}
+    double gamma = 2.6;  
 
     //Crystal Ball variables: (These actually give a pretty good fit, but obv not as good as Gaussian)
     double mean = -1.0;
@@ -33,12 +34,23 @@ int main(){
     double n = 5.0;
     double alpha = 2.0;
 
-    //FiniteFunction test = FiniteFunction(range_min, range_max, output_file);
-    //NormalDistribution test = NormalDistribution(data, range_min, range_max, output_file);
-    //CauchyLorentz test = CauchyLorentz(data, range_min, range_max, gamma, output_file);
-    CrystalBall test = CrystalBall(data, range_min, range_max, mean, variance, n, alpha, output_file);
-    test.plotData(data, nBins, true);
-    test.plotFunction();
+    FiniteFunction finite_distribution = FiniteFunction(range_min, range_max, "Finite_function");
+    NormalDistribution normal_distribution = NormalDistribution(data, range_min, range_max, "Normal_distribution");
+    CauchyLorentz cauchy_distribution = CauchyLorentz(data, range_min, range_max, mean, gamma, "Cauchy_Lorentz_distribution");
+    CrystalBall crystal_ball_distribution = CrystalBall(data, range_min, range_max, mean, variance, n, alpha, "Crystal_ball_distribution");
+
+    //Plotting:
+    finite_distribution.plotData(data, nBins, true);
+    finite_distribution.plotFunction();
+
+    normal_distribution.plotData(data, nBins, true);
+    normal_distribution.plotFunction();
+
+    cauchy_distribution.plotData(data, nBins, true);
+    cauchy_distribution.plotFunction();
+
+    crystal_ball_distribution.plotData(data, nBins, true);
+    crystal_ball_distribution.plotFunction();
 
 
 }

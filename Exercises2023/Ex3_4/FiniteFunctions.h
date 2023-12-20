@@ -26,6 +26,8 @@ public:
   virtual void printInfo(); //Dump parameter info about the current function (Overridable)
   virtual double callFunction(double x); //Call the function with value x (Overridable)
 
+  double sampleFunction(double x);  //Function implementing metropolis algorithim
+
   //Protected members can be accessed by child classes but not users
 protected:
   double m_RMin;
@@ -82,7 +84,7 @@ class CauchyLorentz : public FiniteFunction{
 
   public:
     CauchyLorentz();
-    CauchyLorentz(std::vector<double> data, double range_min, double range_max, double gamma, std::string outfile);
+    CauchyLorentz(std::vector<double> data, double range_min, double range_max, double mean, double gamma, std::string outfile);
     virtual double callFunction(double x); //Call the function with value x (Overridable)
   
   protected:
