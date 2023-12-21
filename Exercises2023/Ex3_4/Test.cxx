@@ -35,6 +35,7 @@ int main(){
     double alpha = 2.0;
 
     FiniteFunction finite_distribution = FiniteFunction(range_min, range_max, "Finite_function");
+    FiniteFunction bleh = FiniteFunction(range_min, range_max, "bleh");
     NormalDistribution normal_distribution = NormalDistribution(data, range_min, range_max, "Normal_distribution");
     CauchyLorentz cauchy_distribution = CauchyLorentz(data, range_min, range_max, mean, gamma, "Cauchy_Lorentz_distribution");
     CrystalBall crystal_ball_distribution = CrystalBall(data, range_min, range_max, mean, variance, n, alpha, "Crystal_ball_distribution");
@@ -51,6 +52,9 @@ int main(){
 
     crystal_ball_distribution.plotData(data, nBins, true);
     crystal_ball_distribution.plotFunction();
+
+    std::vector<double> test = bleh.sampleFunction(100000);
+    bleh.plotData(test, nBins, true);
 
 
 }

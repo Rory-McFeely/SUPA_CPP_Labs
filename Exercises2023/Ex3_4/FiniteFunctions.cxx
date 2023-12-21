@@ -122,17 +122,49 @@ double FiniteFunction::integral(int Ndiv) { //public
 ###################
 */
 
-double FiniteFunction::sampleFunction(double x){
+std::vector<double> FiniteFunction::sampleFunction(int n_points){
   //Setting up the various parameters needed for random number generation:
   unsigned int seed = 100; //Setting seed
   std::mt19937 mtEngine{seed};
   std::uniform_real_distribution<double> uniformPDF{m_RMin, m_RMax};
+  std::uniform_real_distribution<double> uniformPDF_2{0, 1}; //Idk if this step is necessary
+
+  //Creating 2D vector to fill with data:
+  std::vector<std::vector<double>> data;
+  std::vector<double> x_vals;
+  std::vector<double> y_vals;
 
   //First need to generate a random x point within the set range:
   double rand_x = uniformPDF(mtEngine);
   double variance = 1.0;  //Setting an arbitrary sigma
-  //Then generate a y value using a standard distribution centred on rand_x:
-  double rand_y = (1/(sqrt(variance)*sqrt(2*3.14)))*exp(-0.5*pow(((uniformPDF(mtEngine) - rand_x)/variance), 2));
+
+  for(int i=0; i<n_points; i++){
+    //Then generate a y value using a standard distribution centred on rand_x:
+    double rand_y = (1/(sqrt(variance)*sqrt(2*3.14)))*exp(-0.5*pow(((uniformPDF(mtEngine) - rand_x)/variance), 2));
+    
+    //std::cout << "x,y = " << rand_x << " , " << rand_y << std::endl;
+    std::cout << rand_y << std::endl;
+
+    //Next need to generate f_xi:
+    double f_xi = callFunction(rand_x);
+
+    //Performing min val test:
+    double A = rand_y/f_xi;
+    if(A > 1){
+      A = 1;
+    }
+
+    //Generating random number T between 0 & 1:
+    double T = uniformPDF_2(mtEngine);
+
+    //Checking if T < A:
+    if(T<A){
+      y_vals.push_back(rand_y); //Accept y
+      x_vals.push_back(rand_x);
+      rand_x = rand_y;
+  }
+
+  return y_vals;
 }
 
 
